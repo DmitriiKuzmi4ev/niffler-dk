@@ -1,12 +1,17 @@
 package guru.qa.niffler.test;
 
+import com.codeborne.selenide.CollectionCondition;
 import com.codeborne.selenide.Selenide;
 import guru.qa.niffler.jupiter.User;
 import guru.qa.niffler.model.UserJson;
+import io.qameta.allure.Allure;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import static com.codeborne.selenide.Condition.text;
 import static com.codeborne.selenide.Selenide.$;
+import static com.codeborne.selenide.Selenide.$$x;
 import static guru.qa.niffler.jupiter.User.UserType.FRIEND;
 
 public class FriendsWebTest extends BaseWebTest {
@@ -20,17 +25,26 @@ public class FriendsWebTest extends BaseWebTest {
     }
 
     @Test
-    void friendsShouldBeDisplayedInTable0(@User(userType = FRIEND) UserJson userForTest) throws InterruptedException {
-        Thread.sleep(3000);
-    }
+    void friendsShouldBeDisplayedInTable(@User(userType = FRIEND) UserJson userForTest) throws InterruptedException {
 
-    @Test
-    void friendsShouldBeDisplayedInTable1(@User(userType = FRIEND) UserJson userForTest) throws InterruptedException {
-        Thread.sleep(3000);
-    }
+        Allure.step("Click on profile",
+                () -> $("button[aria-label='Menu']").click());
 
-    @Test
-    void friendsShouldBeDisplayedInTable2(@User(userType = FRIEND) UserJson userForTest) throws InterruptedException {
+        Allure.step("Click on Friends",
+                () -> $(".MuiMenu-list")
+                        .$$("li").find(text("Friends")).click());
+
+        var friend = $$x("//tr[contains(@class,'MuiTableRow')]").first();
+
+        Allure.step("Check that friends are showing",
+                () -> Assertions.assertTrue(
+                        friend.getText().contains(
+                                (userForTest.username()
+                                        .equalsIgnoreCase("admin"))
+                                        ? "admin"
+                                        : "admin1")
+                ));
+
     }
 
 }
